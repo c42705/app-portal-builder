@@ -1,15 +1,15 @@
-
 {
   "apps": [
+    // ... existing entries ...
     {
-      "id": "1",
-      "title": "Customer Portal",
-      "description": "A portal for customers to manage their accounts and view products",
+      "id": "3",
+      "title": "Inventory Management",
+      "description": "System for tracking stock levels and warehouse operations",
       "logoUrl": "/placeholder.svg",
-      "url": "https://customer.example.com",
+      "url": "https://inventory.example.com",
       "createdBy": "admin@example.com",
-      "createdAt": "2023-01-15T00:00:00.000Z",
-      "updatedAt": "2023-06-20T00:00:00.000Z",
+      "createdAt": "2023-03-05T00:00:00.000Z",
+      "updatedAt": "2023-07-22T00:00:00.000Z",
       "users": [
         {
           "id": "u1",
@@ -19,23 +19,49 @@
           "permission": "admin"
         },
         {
-          "id": "u2",
-          "name": "John Viewer",
-          "email": "john@example.com",
+          "id": "u4",
+          "name": "Alex Manager",
+          "email": "alex@example.com",
+          "permission": "editor"
+        }
+      ],
+      "isActive": true
+    },
+    {
+      "id": "4",
+      "title": "Reporting Tool",
+      "description": "Analytics platform for generating business intelligence reports",
+      "logoUrl": "/placeholder.svg",
+      "url": "https://analytics.example.com",
+      "createdBy": "admin@example.com",
+      "createdAt": "2023-04-20T00:00:00.000Z",
+      "updatedAt": "2023-08-15T00:00:00.000Z",
+      "users": [
+        {
+          "id": "u1",
+          "name": "Admin User",
+          "email": "admin@example.com",
+          "avatar": "/placeholder.svg",
+          "permission": "admin"
+        },
+        {
+          "id": "u5",
+          "name": "Emma Analyst",
+          "email": "emma@example.com",
           "permission": "viewer"
         }
       ],
       "isActive": true
     },
     {
-      "id": "2",
-      "title": "Employee Dashboard",
-      "description": "Internal dashboard for employee resources and tools",
+      "id": "5",
+      "title": "Support Center",
+      "description": "Internal platform for customer service ticket management",
       "logoUrl": "/placeholder.svg",
-      "url": "https://employees.example.com",
+      "url": "https://support.example.com",
       "createdBy": "admin@example.com",
-      "createdAt": "2023-02-10T00:00:00.000Z",
-      "updatedAt": "2023-05-18T00:00:00.000Z",
+      "createdAt": "2023-05-01T00:00:00.000Z",
+      "updatedAt": "2023-09-01T00:00:00.000Z",
       "users": [
         {
           "id": "u1",
@@ -45,13 +71,14 @@
           "permission": "admin"
         },
         {
-          "id": "u3",
-          "name": "Sarah Editor",
-          "email": "sarah@example.com",
+          "id": "u6",
+          "name": "Mike Support",
+          "email": "mike@example.com",
+          "avatar": "/placeholder.svg",
           "permission": "editor"
         }
       ],
-      "isActive": true
+      "isActive": false
     }
   ]
 }
