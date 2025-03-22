@@ -175,13 +175,13 @@ const Portal = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <ProductCard
               id="1"
-              title="MacBook Pro 15""
+              title='MacBook Pro 15"'
               subtitle="2019"
               image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp16touch-space-select-201911?wid=452&hei=420&fmt=jpeg&qlt=95&.v=1572825197207"
             />
             <ProductCard
               id="2"
-              title="iMac 27""
+              title='iMac 27"'
               subtitle="2019"
               image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/imac-27-cto-hero-201903?wid=452&hei=420&fmt=jpeg&qlt=95&.v=1553120926105"
               active={true}
