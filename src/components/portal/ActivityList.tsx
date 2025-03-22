@@ -5,8 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
+/**
+ * Represents an individual activity item in the list
+ */
 interface ActivityItem {
   id: string;
   title: string;
@@ -15,6 +18,9 @@ interface ActivityItem {
   icon?: React.ReactNode;
 }
 
+/**
+ * Props for the ActivityList component
+ */
 interface ActivityListProps {
   title: string;
   items: ActivityItem[];
@@ -23,6 +29,10 @@ interface ActivityListProps {
   emptyMessage?: string;
 }
 
+/**
+ * ActivityList component that displays a list of activity items
+ * Supports different status types, empty states, and animations
+ */
 const ActivityList: React.FC<ActivityListProps> = ({
   title,
   items,
@@ -30,6 +40,9 @@ const ActivityList: React.FC<ActivityListProps> = ({
   onAddClick,
   emptyMessage = 'No items to display',
 }) => {
+  /**
+   * Gets the appropriate CSS class for a status badge
+   */
   const getStatusClass = (status: ActivityItem['status']) => {
     switch (status) {
       case 'in-progress':
@@ -43,6 +56,9 @@ const ActivityList: React.FC<ActivityListProps> = ({
     }
   };
 
+  /**
+   * Gets the display text for a status
+   */
   const getStatusText = (status: ActivityItem['status']) => {
     switch (status) {
       case 'in-progress':
@@ -56,7 +72,8 @@ const ActivityList: React.FC<ActivityListProps> = ({
     }
   };
 
-  const container = {
+  // Animation variants for the container and items
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -66,7 +83,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
     }
   };
 
-  const item = {
+  const itemAnimation: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
@@ -95,7 +112,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
             animate="show"
           >
             {items.map((item) => (
-              <motion.li key={item.id} className="flex items-center" variants={item}>
+              <motion.li key={item.id} className="flex items-center" variants={itemAnimation}>
                 {item.icon && (
                   <div className="mr-3 flex-shrink-0">{item.icon}</div>
                 )}

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   LayoutDashboard, 
-  Apps, 
+  AppWindow, 
   Users, 
   Settings, 
   LogOut, 
@@ -18,6 +18,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
+/**
+ * AdminLayout component that provides the overall structure for admin pages
+ * @param {React.ReactNode} children - Content to be rendered within the layout
+ * @param {string} title - Title of the current admin page
+ */
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
@@ -36,7 +41,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       onClick: () => navigate('/admin') 
     },
     { 
-      icon: <Apps size={20} />, 
+      icon: <AppWindow size={20} />, 
       label: 'App Portal', 
       onClick: () => navigate('/admin/apps') 
     },

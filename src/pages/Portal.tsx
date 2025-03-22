@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LogOut, PlusCircle, Check, Plane, Diamond, GoogleDrive } from 'lucide-react';
+import { LogOut, PlusCircle, Check, Plane, Diamond, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppConfig } from '@/contexts/AppConfigContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +12,10 @@ import ServiceCard from '@/components/portal/ServiceCard';
 import ActivityList from '@/components/portal/ActivityList';
 import { motion } from 'framer-motion';
 
+/**
+ * Portal component that displays a dynamic app portal based on the app ID
+ * Handles permissions, loading states, and displays app content
+ */
 const Portal = () => {
   const { id } = useParams<{ id: string }>();
   const { apps } = useAppConfig();
@@ -90,7 +93,7 @@ const Portal = () => {
       title: 'Access to Google Drive',
       time: '57 min',
       status: 'open' as const,
-      icon: <GoogleDrive className="h-5 w-5 text-yellow-500" />,
+      icon: <FileText className="h-5 w-5 text-yellow-500" />,
     },
   ];
   
@@ -216,7 +219,7 @@ const Portal = () => {
             <ServiceCard
               title="Access to Google Drive"
               value="11"
-              icon={<GoogleDrive size={32} className="text-yellow-500" />}
+              icon={<FileText size={32} className="text-yellow-500" />}
             />
             <ServiceCard
               title="Access to Slack"

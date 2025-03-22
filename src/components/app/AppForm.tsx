@@ -20,10 +20,17 @@ import {
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import { toast } from 'sonner';
 
+/**
+ * Props for the AppForm component
+ */
 interface AppFormProps {
   existingApp?: AppConfig;
 }
 
+/**
+ * AppForm component for creating and editing app portals
+ * Provides form fields for app configuration and manages submission
+ */
 const AppForm: React.FC<AppFormProps> = ({ existingApp }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,6 +45,9 @@ const AppForm: React.FC<AppFormProps> = ({ existingApp }) => {
 
   const isEditMode = !!existingApp;
 
+  /**
+   * Handles form submission for creating or updating an app
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -110,7 +120,7 @@ const AppForm: React.FC<AppFormProps> = ({ existingApp }) => {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title" required>App Title</Label>
+              <Label htmlFor="title">App Title *</Label>
               <Input
                 id="title"
                 value={title}
@@ -132,7 +142,7 @@ const AppForm: React.FC<AppFormProps> = ({ existingApp }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="url" required>URL</Label>
+              <Label htmlFor="url">URL *</Label>
               <Input
                 id="url"
                 value={url}
