@@ -12,6 +12,19 @@ interface StoredData {
 }
 
 /**
+ * Helper function to convert string permission to UserPermission type
+ * @param permission Permission string from JSON
+ * @returns Valid UserPermission type or defaults to "viewer"
+ */
+const convertToUserPermission = (permission: string): UserPermission => {
+  if (permission === "admin" || permission === "editor" || permission === "viewer") {
+    return permission as UserPermission;
+  }
+  console.warn(`Invalid permission "${permission}" found, defaulting to "viewer"`);
+  return "viewer";
+};
+
+/**
  * Loads app data from localStorage or initializes with default data
  * @returns The stored app data
  */
@@ -21,12 +34,17 @@ export const loadData = (): StoredData => {
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       
-      // Convert date strings back to Date objects
+      // Convert date strings back to Date objects and validate permissions
       if (parsedData.apps) {
         parsedData.apps = parsedData.apps.map((app: any) => ({
           ...app,
           createdAt: new Date(app.createdAt),
-          updatedAt: new Date(app.updatedAt)
+          updatedAt: new Date(app.updatedAt),
+          // Ensure users have valid permission types
+          users: app.users.map((user: any) => ({
+            ...user,
+            permission: convertToUserPermission(user.permission)
+          }))
         }));
       }
       
@@ -41,8 +59,13 @@ export const loadData = (): StoredData => {
     apps: initialData.apps.map(app => ({
       ...app,
       createdAt: new Date(app.createdAt),
-      updatedAt: new Date(app.updatedAt)
-    }))
+      updatedAt: new Date(app.updatedAt),
+      // Ensure users have valid permission types
+      users: app.users.map((user: any) => ({
+        ...user,
+        permission: convertToUserPermission(user.permission)
+      }))
+    })) as AppConfig[]
   };
 };
 
@@ -141,8 +164,14 @@ export const addUserToApp = (appId: string, user: Omit<AppUser, "id">): AppConfi
   const existingUser = data.apps[appIndex].users.find(u => u.email === user.email);
   if (existingUser) return null;
   
-  const newUser: AppUser = { ...user, id: Date.now().toString() };
-  data.apps[appIndex].users.push(newUser);
+  // Ensure we're using a valid permission type
+  const validatedUser: AppUser = { 
+    ...user, 
+    id: Date.now().toString(),
+    permission: convertToUserPermission(user.permission as string)
+  };
+  
+  data.apps[appIndex].users.push(validatedUser);
   data.apps[appIndex].updatedAt = new Date();
   
   saveData(data);
@@ -188,7 +217,8 @@ export const updateUserPermission = (
   const userIndex = data.apps[appIndex].users.findIndex(user => user.id === userId);
   if (userIndex === -1) return null;
   
-  data.apps[appIndex].users[userIndex].permission = permission;
+  // Ensure we're using a valid permission type
+  data.apps[appIndex].users[userIndex].permission = convertToUserPermission(permission as string);
   data.apps[appIndex].updatedAt = new Date();
   
   saveData(data);
