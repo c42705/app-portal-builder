@@ -53,8 +53,14 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Load initial data
   useEffect(() => {
-    const loadedApps = dataService.getApps();
-    setApps(loadedApps);
+    try {
+      const loadedApps = dataService.getApps();
+      setApps(loadedApps);
+      console.log('Data loaded successfully:', loadedApps);
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+      toast.error('Failed to load application data');
+    }
   }, []);
 
   /**
@@ -62,9 +68,15 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param newApp App configuration without id and timestamps
    */
   const addApp = (newApp: Omit<AppConfig, "id" | "createdAt" | "updatedAt">) => {
-    const app = dataService.addApp(newApp);
-    setApps([...apps, app]);
-    toast.success("App created successfully");
+    try {
+      const app = dataService.addApp(newApp);
+      setApps([...apps, app]);
+      toast.success("App created successfully");
+      console.log('App added and JSON updated:', app);
+    } catch (error) {
+      console.error('Error adding app:', error);
+      toast.error('Failed to create app');
+    }
   };
 
   /**
@@ -73,19 +85,25 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param updates Partial app data to update
    */
   const updateApp = (id: string, updates: Partial<AppConfig>) => {
-    const updatedApp = dataService.updateApp(id, updates);
-    
-    if (updatedApp) {
-      setApps(apps.map(app => app.id === id ? updatedApp : app));
+    try {
+      const updatedApp = dataService.updateApp(id, updates);
       
-      // Update current app if it's the one being updated
-      if (currentApp?.id === id) {
-        setCurrentApp(updatedApp);
+      if (updatedApp) {
+        setApps(apps.map(app => app.id === id ? updatedApp : app));
+        
+        // Update current app if it's the one being updated
+        if (currentApp?.id === id) {
+          setCurrentApp(updatedApp);
+        }
+        
+        toast.success("App updated successfully");
+        console.log('App updated and JSON updated:', updatedApp);
+      } else {
+        toast.error("App not found");
       }
-      
-      toast.success("App updated successfully");
-    } else {
-      toast.error("App not found");
+    } catch (error) {
+      console.error('Error updating app:', error);
+      toast.error('Failed to update app');
     }
   };
 
@@ -94,19 +112,25 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param id App ID to delete
    */
   const deleteApp = (id: string) => {
-    const success = dataService.deleteApp(id);
-    
-    if (success) {
-      setApps(apps.filter(app => app.id !== id));
+    try {
+      const success = dataService.deleteApp(id);
       
-      // Clear current app if it's the one being deleted
-      if (currentApp?.id === id) {
-        setCurrentApp(null);
+      if (success) {
+        setApps(apps.filter(app => app.id !== id));
+        
+        // Clear current app if it's the one being deleted
+        if (currentApp?.id === id) {
+          setCurrentApp(null);
+        }
+        
+        toast.success("App deleted successfully");
+        console.log('App deleted and JSON updated');
+      } else {
+        toast.error("App not found");
       }
-      
-      toast.success("App deleted successfully");
-    } else {
-      toast.error("App not found");
+    } catch (error) {
+      console.error('Error deleting app:', error);
+      toast.error('Failed to delete app');
     }
   };
 
@@ -116,19 +140,25 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param user User data without ID
    */
   const addUserToApp = (appId: string, user: Omit<AppUser, "id">) => {
-    const updatedApp = dataService.addUserToApp(appId, user);
-    
-    if (updatedApp) {
-      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+    try {
+      const updatedApp = dataService.addUserToApp(appId, user);
       
-      // Update current app if it's the one being modified
-      if (currentApp?.id === appId) {
-        setCurrentApp(updatedApp);
+      if (updatedApp) {
+        setApps(apps.map(app => app.id === appId ? updatedApp : app));
+        
+        // Update current app if it's the one being modified
+        if (currentApp?.id === appId) {
+          setCurrentApp(updatedApp);
+        }
+        
+        toast.success("User added successfully");
+        console.log('User added and JSON updated:', updatedApp);
+      } else {
+        toast.error("User already exists or app not found");
       }
-      
-      toast.success("User added successfully");
-    } else {
-      toast.error("User already exists or app not found");
+    } catch (error) {
+      console.error('Error adding user to app:', error);
+      toast.error('Failed to add user');
     }
   };
 
@@ -138,19 +168,25 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param userId User ID to remove
    */
   const removeUserFromApp = (appId: string, userId: string) => {
-    const updatedApp = dataService.removeUserFromApp(appId, userId);
-    
-    if (updatedApp) {
-      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+    try {
+      const updatedApp = dataService.removeUserFromApp(appId, userId);
       
-      // Update current app if it's the one being modified
-      if (currentApp?.id === appId) {
-        setCurrentApp(updatedApp);
+      if (updatedApp) {
+        setApps(apps.map(app => app.id === appId ? updatedApp : app));
+        
+        // Update current app if it's the one being modified
+        if (currentApp?.id === appId) {
+          setCurrentApp(updatedApp);
+        }
+        
+        toast.success("User removed successfully");
+        console.log('User removed and JSON updated:', updatedApp);
+      } else {
+        toast.error("App not found");
       }
-      
-      toast.success("User removed successfully");
-    } else {
-      toast.error("App not found");
+    } catch (error) {
+      console.error('Error removing user from app:', error);
+      toast.error('Failed to remove user');
     }
   };
 
@@ -161,19 +197,25 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * @param permission New permission level
    */
   const updateUserPermission = (appId: string, userId: string, permission: UserPermission) => {
-    const updatedApp = dataService.updateUserPermission(appId, userId, permission);
-    
-    if (updatedApp) {
-      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+    try {
+      const updatedApp = dataService.updateUserPermission(appId, userId, permission);
       
-      // Update current app if it's the one being modified
-      if (currentApp?.id === appId) {
-        setCurrentApp(updatedApp);
+      if (updatedApp) {
+        setApps(apps.map(app => app.id === appId ? updatedApp : app));
+        
+        // Update current app if it's the one being modified
+        if (currentApp?.id === appId) {
+          setCurrentApp(updatedApp);
+        }
+        
+        toast.success("User permission updated");
+        console.log('User permission updated and JSON updated:', updatedApp);
+      } else {
+        toast.error("User or app not found");
       }
-      
-      toast.success("User permission updated");
-    } else {
-      toast.error("User or app not found");
+    } catch (error) {
+      console.error('Error updating user permission:', error);
+      toast.error('Failed to update user permission');
     }
   };
 

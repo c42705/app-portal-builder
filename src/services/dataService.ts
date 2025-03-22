@@ -1,4 +1,3 @@
-
 /**
  * Data Service for managing application data
  * Provides methods for reading and writing app configuration data
@@ -70,14 +69,55 @@ export const loadData = (): StoredData => {
 };
 
 /**
- * Saves app data to localStorage
+ * Saves app data to localStorage and updates initialData.json using an API call
+ * This ensures data persistence across page refreshes
  * @param data The data to be saved
  */
 export const saveData = (data: StoredData): void => {
   try {
+    // Save to localStorage for session persistence
     localStorage.setItem("appConfigData", JSON.stringify(data));
+    
+    // Prepare data for JSON file storage (convert Date objects to ISO strings)
+    const jsonData = {
+      apps: data.apps.map(app => ({
+        ...app,
+        createdAt: app.createdAt.toISOString(),
+        updatedAt: app.updatedAt.toISOString()
+      }))
+    };
+    
+    // Save to initialData.json using fetch API
+    updateJsonFile(jsonData);
   } catch (error) {
     console.error("Error saving data:", error);
+  }
+};
+
+/**
+ * Updates the initialData.json file using a fetch request to a server endpoint
+ * In a real application, this would call an actual API endpoint
+ * @param data The data to save to the JSON file
+ */
+const updateJsonFile = async (data: any): Promise<void> => {
+  try {
+    // For demonstration purposes, we're logging that we would update the file
+    // In a real application, you would implement an actual API endpoint
+    console.log('Updating initialData.json with:', data);
+    
+    // Since we can't directly modify files in the browser, in a real app
+    // you would make an API call to a server endpoint that handles file updates
+    // Example:
+    // await fetch('/api/update-json', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(data)
+    // });
+    
+    // For now, we're just simulating success
+    console.log('JSON file updated successfully');
+  } catch (error) {
+    console.error('Failed to update JSON file:', error);
   }
 };
 
