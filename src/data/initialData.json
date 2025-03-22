@@ -1,0 +1,57 @@
+
+{
+  "apps": [
+    {
+      "id": "1",
+      "title": "Customer Portal",
+      "description": "A portal for customers to manage their accounts and view products",
+      "logoUrl": "/placeholder.svg",
+      "url": "https://customer.example.com",
+      "createdBy": "admin@example.com",
+      "createdAt": "2023-01-15T00:00:00.000Z",
+      "updatedAt": "2023-06-20T00:00:00.000Z",
+      "users": [
+        {
+          "id": "u1",
+          "name": "Admin User",
+          "email": "admin@example.com",
+          "avatar": "/placeholder.svg",
+          "permission": "admin"
+        },
+        {
+          "id": "u2",
+          "name": "John Viewer",
+          "email": "john@example.com",
+          "permission": "viewer"
+        }
+      ],
+      "isActive": true
+    },
+    {
+      "id": "2",
+      "title": "Employee Dashboard",
+      "description": "Internal dashboard for employee resources and tools",
+      "logoUrl": "/placeholder.svg",
+      "url": "https://employees.example.com",
+      "createdBy": "admin@example.com",
+      "createdAt": "2023-02-10T00:00:00.000Z",
+      "updatedAt": "2023-05-18T00:00:00.000Z",
+      "users": [
+        {
+          "id": "u1",
+          "name": "Admin User",
+          "email": "admin@example.com",
+          "avatar": "/placeholder.svg",
+          "permission": "admin"
+        },
+        {
+          "id": "u3",
+          "name": "Sarah Editor",
+          "email": "sarah@example.com",
+          "permission": "editor"
+        }
+      ],
+      "isActive": true
+    }
+  ]
+}

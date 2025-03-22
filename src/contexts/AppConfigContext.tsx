@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import * as dataService from "@/services/dataService";
 
 // Type definitions
 export type UserPermission = "admin" | "viewer" | "editor";
@@ -39,176 +40,150 @@ interface AppConfigContextType {
   isAdmin: (email: string) => boolean;
 }
 
-// Mock data for initial apps
-const initialApps: AppConfig[] = [
-  {
-    id: "1",
-    title: "Customer Portal",
-    description: "A portal for customers to manage their accounts and view products",
-    logoUrl: "/placeholder.svg",
-    url: "https://customer.example.com",
-    createdBy: "admin@example.com",
-    createdAt: new Date("2023-01-15"),
-    updatedAt: new Date("2023-06-20"),
-    users: [
-      {
-        id: "u1",
-        name: "Admin User",
-        email: "admin@example.com",
-        avatar: "/placeholder.svg",
-        permission: "admin"
-      },
-      {
-        id: "u2",
-        name: "John Viewer",
-        email: "john@example.com",
-        permission: "viewer"
-      }
-    ],
-    isActive: true
-  },
-  {
-    id: "2",
-    title: "Employee Dashboard",
-    description: "Internal dashboard for employee resources and tools",
-    logoUrl: "/placeholder.svg",
-    url: "https://employees.example.com",
-    createdBy: "admin@example.com",
-    createdAt: new Date("2023-02-10"),
-    updatedAt: new Date("2023-05-18"),
-    users: [
-      {
-        id: "u1",
-        name: "Admin User",
-        email: "admin@example.com",
-        avatar: "/placeholder.svg",
-        permission: "admin"
-      },
-      {
-        id: "u3",
-        name: "Sarah Editor",
-        email: "sarah@example.com",
-        permission: "editor"
-      }
-    ],
-    isActive: true
-  }
-];
-
 // Create context
 const AppConfigContext = createContext<AppConfigContextType | undefined>(undefined);
 
-// Provider component
+/**
+ * Provider component for app configuration context
+ * Uses the data service to manage app data
+ */
 export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [apps, setApps] = useState<AppConfig[]>(() => {
-    // Try to load from localStorage
-    const savedApps = localStorage.getItem("appConfigs");
-    return savedApps ? JSON.parse(savedApps) : initialApps;
-  });
-  
+  const [apps, setApps] = useState<AppConfig[]>([]);
   const [currentApp, setCurrentApp] = useState<AppConfig | null>(null);
 
-  // Save to localStorage whenever apps change
+  // Load initial data
   useEffect(() => {
-    localStorage.setItem("appConfigs", JSON.stringify(apps));
-  }, [apps]);
+    const loadedApps = dataService.getApps();
+    setApps(loadedApps);
+  }, []);
 
+  /**
+   * Adds a new app
+   * @param newApp App configuration without id and timestamps
+   */
   const addApp = (newApp: Omit<AppConfig, "id" | "createdAt" | "updatedAt">) => {
-    const app: AppConfig = {
-      ...newApp,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
+    const app = dataService.addApp(newApp);
     setApps([...apps, app]);
     toast.success("App created successfully");
   };
 
+  /**
+   * Updates an existing app
+   * @param id App ID
+   * @param updates Partial app data to update
+   */
   const updateApp = (id: string, updates: Partial<AppConfig>) => {
-    setApps(apps.map(app => 
-      app.id === id 
-        ? { ...app, ...updates, updatedAt: new Date() } 
-        : app
-    ));
+    const updatedApp = dataService.updateApp(id, updates);
     
-    // Update current app if it's the one being updated
-    if (currentApp?.id === id) {
-      setCurrentApp({ ...currentApp, ...updates, updatedAt: new Date() });
+    if (updatedApp) {
+      setApps(apps.map(app => app.id === id ? updatedApp : app));
+      
+      // Update current app if it's the one being updated
+      if (currentApp?.id === id) {
+        setCurrentApp(updatedApp);
+      }
+      
+      toast.success("App updated successfully");
+    } else {
+      toast.error("App not found");
     }
-    
-    toast.success("App updated successfully");
   };
 
+  /**
+   * Deletes an app by ID
+   * @param id App ID to delete
+   */
   const deleteApp = (id: string) => {
-    setApps(apps.filter(app => app.id !== id));
+    const success = dataService.deleteApp(id);
     
-    // Clear current app if it's the one being deleted
-    if (currentApp?.id === id) {
-      setCurrentApp(null);
+    if (success) {
+      setApps(apps.filter(app => app.id !== id));
+      
+      // Clear current app if it's the one being deleted
+      if (currentApp?.id === id) {
+        setCurrentApp(null);
+      }
+      
+      toast.success("App deleted successfully");
+    } else {
+      toast.error("App not found");
     }
-    
-    toast.success("App deleted successfully");
   };
 
+  /**
+   * Adds a user to an app
+   * @param appId App ID
+   * @param user User data without ID
+   */
   const addUserToApp = (appId: string, user: Omit<AppUser, "id">) => {
-    setApps(apps.map(app => {
-      if (app.id === appId) {
-        // Check if user already exists
-        const existingUser = app.users.find(u => u.email === user.email);
-        if (existingUser) {
-          toast.error("User already exists in this app");
-          return app;
-        }
-        
-        const newUser: AppUser = { ...user, id: Date.now().toString() };
-        return { 
-          ...app, 
-          users: [...app.users, newUser],
-          updatedAt: new Date()
-        };
-      }
-      return app;
-    }));
+    const updatedApp = dataService.addUserToApp(appId, user);
     
-    toast.success("User added successfully");
+    if (updatedApp) {
+      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+      
+      // Update current app if it's the one being modified
+      if (currentApp?.id === appId) {
+        setCurrentApp(updatedApp);
+      }
+      
+      toast.success("User added successfully");
+    } else {
+      toast.error("User already exists or app not found");
+    }
   };
 
+  /**
+   * Removes a user from an app
+   * @param appId App ID
+   * @param userId User ID to remove
+   */
   const removeUserFromApp = (appId: string, userId: string) => {
-    setApps(apps.map(app => {
-      if (app.id === appId) {
-        return { 
-          ...app, 
-          users: app.users.filter(user => user.id !== userId),
-          updatedAt: new Date()
-        };
-      }
-      return app;
-    }));
+    const updatedApp = dataService.removeUserFromApp(appId, userId);
     
-    toast.success("User removed successfully");
+    if (updatedApp) {
+      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+      
+      // Update current app if it's the one being modified
+      if (currentApp?.id === appId) {
+        setCurrentApp(updatedApp);
+      }
+      
+      toast.success("User removed successfully");
+    } else {
+      toast.error("App not found");
+    }
   };
 
+  /**
+   * Updates a user's permission within an app
+   * @param appId App ID
+   * @param userId User ID
+   * @param permission New permission level
+   */
   const updateUserPermission = (appId: string, userId: string, permission: UserPermission) => {
-    setApps(apps.map(app => {
-      if (app.id === appId) {
-        return { 
-          ...app, 
-          users: app.users.map(user => 
-            user.id === userId ? { ...user, permission } : user
-          ),
-          updatedAt: new Date()
-        };
-      }
-      return app;
-    }));
+    const updatedApp = dataService.updateUserPermission(appId, userId, permission);
     
-    toast.success("User permission updated");
+    if (updatedApp) {
+      setApps(apps.map(app => app.id === appId ? updatedApp : app));
+      
+      // Update current app if it's the one being modified
+      if (currentApp?.id === appId) {
+        setCurrentApp(updatedApp);
+      }
+      
+      toast.success("User permission updated");
+    } else {
+      toast.error("User or app not found");
+    }
   };
 
+  /**
+   * Checks if a user has admin permissions
+   * @param email User email
+   * @returns True if user is an admin
+   */
   const isAdmin = (email: string) => {
-    // In a real app, this would verify from a backend auth system
-    return email === "admin@example.com";
+    return dataService.isAdmin(email);
   };
 
   return (
@@ -229,7 +204,11 @@ export const AppConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 };
 
-// Custom hook for using this context
+/**
+ * Custom hook for using the app config context
+ * @returns App configuration context
+ * @throws Error if used outside provider
+ */
 export const useAppConfig = () => {
   const context = useContext(AppConfigContext);
   if (context === undefined) {
