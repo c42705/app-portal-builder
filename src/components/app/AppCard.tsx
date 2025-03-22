@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { MoreVertical } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AppCardProps {
   app: AppConfig;
@@ -39,17 +40,36 @@ interface AppCardProps {
 
 const AppCard: React.FC<AppCardProps> = ({ app }) => {
   const { deleteApp } = useAppConfig();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
+  /**
+   * Handles editing the app (admin only)
+   */
   const handleEdit = () => {
     navigate(`/admin/apps/edit/${app.id}`);
   };
 
+  /**
+   * Handles managing app users (admin only)
+   */
   const handleUsers = () => {
     navigate(`/admin/apps/${app.id}/users`);
   };
 
+  /**
+   * Opens the app URL in a new tab
+   */
+  const handleOpenApp = () => {
+    window.open(app.url, '_blank');
+  };
+
+  /**
+   * Formats a date for display
+   * @param date Date to format
+   * @returns Formatted date string
+   */
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -67,7 +87,10 @@ const AppCard: React.FC<AppCardProps> = ({ app }) => {
         whileHover={{ y: -5, transition: { duration: 0.2 } }}
         className="h-full"
       >
-        <Card className="h-full flex flex-col overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-all">
+        <Card 
+          className="h-full flex flex-col overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-all cursor-pointer"
+          onClick={handleOpenApp}
+        >
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <div className="flex items-center space-x-3">
@@ -87,35 +110,41 @@ const AppCard: React.FC<AppCardProps> = ({ app }) => {
                 </div>
               </div>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <MoreVertical size={16} />
                     <span className="sr-only">Menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleEdit}>
-                    <Edit size={14} className="mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleUsers}>
-                    <Users size={14} className="mr-2" />
-                    Manage users
-                  </DropdownMenuItem>
+                  {isAdmin() && (
+                    <>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(); }}>
+                        <Edit size={14} className="mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleUsers(); }}>
+                        <Users size={14} className="mr-2" />
+                        Manage users
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem
-                    onClick={() => window.open(app.url, '_blank')}
+                    onClick={(e) => { e.stopPropagation(); handleOpenApp(); }}
                     className="text-blue-600"
                   >
                     <ExternalLink size={14} className="mr-2" />
                     Visit portal
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setOpenDeleteDialog(true)}
-                    className="text-red-600"
-                  >
-                    <Trash2 size={14} className="mr-2" />
-                    Delete
-                  </DropdownMenuItem>
+                  {isAdmin() && (
+                    <DropdownMenuItem
+                      onClick={(e) => { e.stopPropagation(); setOpenDeleteDialog(true); }}
+                      className="text-red-600"
+                    >
+                      <Trash2 size={14} className="mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -134,26 +163,28 @@ const AppCard: React.FC<AppCardProps> = ({ app }) => {
         </Card>
       </motion.div>
 
-      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the <strong>{app.title}</strong> app portal and all associated user permissions.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteApp(app.id)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isAdmin() && (
+        <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the <strong>{app.title}</strong> app portal and all associated user permissions.
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteApp(app.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 };

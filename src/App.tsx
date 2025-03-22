@@ -15,19 +15,25 @@ import AppList from "./pages/AppList";
 import AppCreate from "./pages/AppCreate";
 import AppEdit from "./pages/AppEdit";
 import AppUsers from "./pages/AppUsers";
+import Settings from "./pages/Settings";
 import Portal from "./pages/Portal";
 import NotFound from "./pages/NotFound";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
       </div>
     );
+  }
+  
+  // Check for temporary password
+  if (isAuthenticated && user?.isTemporaryPassword) {
+    return <Navigate to="/admin/settings" />;
   }
   
   if (!isAuthenticated) {
@@ -80,6 +86,11 @@ const App = () => (
                 <Route path="/admin/apps/:id/users" element={
                   <ProtectedRoute>
                     <AppUsers />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } />
                 
