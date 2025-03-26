@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AppConfigProvider } from "./contexts/AppConfigContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 // Pages
 import Index from "./pages/Index";
@@ -16,12 +17,13 @@ import AppCreate from "./pages/AppCreate";
 import AppEdit from "./pages/AppEdit";
 import AppUsers from "./pages/AppUsers";
 import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 import Portal from "./pages/Portal";
 import NotFound from "./pages/NotFound";
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+// Protected route component with role-based access
+const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
+  const { isAuthenticated, isLoading, user, isAdmin } = useAuth();
   
   if (isLoading) {
     return (
@@ -40,6 +42,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" />;
   }
   
+  // If it's an admin-only route and user is not admin
+  if (adminOnly && !isAdmin()) {
+    return <Navigate to="/admin/apps" />;
+  }
+  
   return <>{children}</>;
 };
 
@@ -54,57 +61,77 @@ const App = () => (
       <TooltipProvider>
         <AuthProvider>
           <AppConfigProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                
-                {/* Admin routes (protected) */}
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/apps" element={
-                  <ProtectedRoute>
-                    <AppList />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/apps/new" element={
-                  <ProtectedRoute>
-                    <AppCreate />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/apps/edit/:id" element={
-                  <ProtectedRoute>
-                    <AppEdit />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/apps/:id/users" element={
-                  <ProtectedRoute>
-                    <AppUsers />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/settings" element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Portal route (protected) */}
-                <Route path="/portal/:id" element={
-                  <ProtectedRoute>
-                    <Portal />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <NotificationProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  
+                  {/* Admin-only routes */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute adminOnly>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin/apps/new" element={
+                    <ProtectedRoute adminOnly>
+                      <AppCreate />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin/apps/edit/:id" element={
+                    <ProtectedRoute adminOnly>
+                      <AppEdit />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin/apps/:id/users" element={
+                    <ProtectedRoute adminOnly>
+                      <AppUsers />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Regular user routes (accessible by all) */}
+                  <Route path="/admin/apps" element={
+                    <ProtectedRoute>
+                      <AppList />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin/settings" element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin/notifications" element={
+                    <ProtectedRoute>
+                      <Notifications />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/portal/:id" element={
+                    <ProtectedRoute>
+                      <Portal />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Redirect from admin home to apps for non-admin users */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <Navigate to="/admin/apps" />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Catch-all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </NotificationProvider>
           </AppConfigProvider>
         </AuthProvider>
       </TooltipProvider>

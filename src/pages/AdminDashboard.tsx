@@ -9,7 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppConfig } from '@/contexts/AppConfigContext';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import SendNotification from '@/components/notifications/SendNotification';
 
+/**
+ * Admin dashboard page with overview statistics and action buttons
+ */
 const AdminDashboard = () => {
   const { apps } = useAppConfig();
   const { user } = useAuth();
@@ -95,11 +99,11 @@ const AdminDashboard = () => {
                   {recentApps.map((app) => (
                     <div
                       key={app.id}
-                      className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md cursor-pointer"
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md cursor-pointer"
                       onClick={() => navigate(`/admin/apps/edit/${app.id}`)}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                           <img 
                             src={app.logoUrl} 
                             alt={app.title} 
@@ -111,7 +115,7 @@ const AdminDashboard = () => {
                         </div>
                         <div>
                           <h3 className="font-medium">{app.title}</h3>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             Updated {new Date(app.updatedAt).toLocaleDateString()}
                           </p>
                         </div>
@@ -145,7 +149,7 @@ const AdminDashboard = () => {
 
                   {recentApps.length === 0 && (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No app portals created yet</p>
+                      <p className="text-gray-500 dark:text-gray-400">No app portals created yet</p>
                       <Button 
                         variant="link" 
                         onClick={() => navigate('/admin/apps/new')}
@@ -165,60 +169,7 @@ const AdminDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
-                  Latest actions and updates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {apps.length > 0 ? (
-                    <>
-                      <div className="flex items-start space-x-3">
-                        <div className="mt-1 bg-blue-100 text-blue-600 rounded-full p-1.5">
-                          <Settings className="h-3 w-3" />
-                        </div>
-                        <div>
-                          <p className="text-sm">App portal updated</p>
-                          <p className="text-xs text-gray-500">
-                            {recentApps[0]?.title} was updated {' '}
-                            {new Date(recentApps[0]?.updatedAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="mt-1 bg-green-100 text-green-600 rounded-full p-1.5">
-                          <Users className="h-3 w-3" />
-                        </div>
-                        <div>
-                          <p className="text-sm">Users added</p>
-                          <p className="text-xs text-gray-500">
-                            New users were added to your portals
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-6">
-                      <p className="text-gray-500">No recent activity</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="border-t pt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigate('/admin/settings')}
-                >
-                  View All Activity
-                </Button>
-              </CardFooter>
-            </Card>
+            <SendNotification />
           </motion.div>
         </div>
       </div>

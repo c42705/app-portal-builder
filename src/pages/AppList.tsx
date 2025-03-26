@@ -7,15 +7,25 @@ import { Input } from '@/components/ui/input';
 import AdminLayout from '@/components/layout/AdminLayout';
 import AppCard from '@/components/app/AppCard';
 import { useAppConfig } from '@/contexts/AppConfigContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 
+/**
+ * AppList component that displays available apps with role-based filtering
+ */
 const AppList = () => {
   const { apps } = useAppConfig();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Filter apps based on search query
-  const filteredApps = apps.filter(app => 
+  // First filter the apps based on user role
+  const roleFilteredApps = isAdmin() 
+    ? apps 
+    : apps.filter(app => app.isActive);
+  
+  // Then filter apps based on search query
+  const filteredApps = roleFilteredApps.filter(app => 
     app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     app.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -33,10 +43,12 @@ const AppList = () => {
               className="pl-9 w-full sm:w-64"
             />
           </div>
-          <Button onClick={() => navigate('/admin/apps/new')}>
-            <Plus size={16} className="mr-2" />
-            New App Portal
-          </Button>
+          {isAdmin() && (
+            <Button onClick={() => navigate('/admin/apps/new')}>
+              <Plus size={16} className="mr-2" />
+              New App Portal
+            </Button>
+          )}
         </div>
         
         {filteredApps.length > 0 ? (
@@ -50,21 +62,23 @@ const AppList = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="text-center py-12 bg-gray-50 rounded-lg"
+            className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg"
           >
             {searchQuery ? (
               <>
-                <p className="text-gray-500 mb-2">No app portals found matching "{searchQuery}"</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-2">No app portals found matching "{searchQuery}"</p>
                 <Button variant="outline" onClick={() => setSearchQuery('')}>
                   Clear search
                 </Button>
               </>
             ) : (
               <>
-                <p className="text-gray-500 mb-2">No app portals created yet</p>
-                <Button onClick={() => navigate('/admin/apps/new')}>
-                  Create your first app portal
-                </Button>
+                <p className="text-gray-500 dark:text-gray-400 mb-2">No app portals available</p>
+                {isAdmin() && (
+                  <Button onClick={() => navigate('/admin/apps/new')}>
+                    Create your first app portal
+                  </Button>
+                )}
               </>
             )}
           </motion.div>

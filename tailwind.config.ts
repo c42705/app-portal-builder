@@ -53,9 +53,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Add portal gradient colors
+        // Add portal gradient colors with improved contrast
         "portal-gradient-start": "#3b82f6", // Blue color
         "portal-gradient-end": "#60a5fa",   // Lighter blue color
+        
+        // Add dark mode variations with better contrast
+        "portal-gradient-start-dark": "#4f8df9", // Brighter blue for dark mode
+        "portal-gradient-end-dark": "#7ab2ff",    // Brighter light blue for dark mode
       },
       borderRadius: {
         lg: "var(--radius)",
